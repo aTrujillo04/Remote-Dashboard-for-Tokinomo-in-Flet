@@ -1,0 +1,135 @@
+from flask import Flask, request, jsonify
+import RPi.GPIO as GPIO
+import subprocess
+import os
+import threading
+import time
+
+app = Flask(__name__)
+
+# Pines
+PIN_LUZ = 22
+PIN_MOTOR_1A = 12
+PIN_MOTOR_2A = 18
+PIN_PIR = 25
+PIN_ENABLE = 4  # Enable del motor
+
+# Configuración GPIO
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(PIN_ENABLE, GPIO.OUT)
+GPIO.output(PIN_ENABLE, GPIO.HIGH)  # Enable siempre encendido
+GPIO.setup(PIN_LUZ, GPIO.OUT)
+GPIO.setup(PIN_MOTOR_1A, GPIO.OUT)
+GPIO.setup(PIN_MOTOR_2A, GPIO.OUT)
+GPIO.setup(PIN_PIR, GPIO.IN)
+
+# PWM Motor
+FREQ_PWM = 1000
+pwm_motor_1A = GPIO.PWM(PIN_MOTOR_1A, FREQ_PWM)
+pwm_motor_2A = GPIO.PWM(PIN_MOTOR_2A, FREQ_PWM)
+pwm_motor_1A.start(0)
+pwm_motor_2A.start(0)
+
+# Sonido
+SONIDO_PATH = os.path.join(os.path.dirname(__file__), "ZWAN.mp3")
+
+# Variable global para controlar la rutina
+rutina_activa = False
+
+# --- Función que espera al PIR ---
+def rutina_espera_pir():
+    global rutina_activa
+    print("Rutina activada: esperando PIR...")
+    while rutina_activa:
+        if GPIO.input(PIN_PIR) == GPIO.HIGH:
+            print("PIR detectó movimiento, ejecutando rutina")
+            # Ejecutar luz, motor y sonido
+            GPIO.output(PIN_LUZ, GPIO.HIGH)
+            pwm_motor_1A.ChangeDutyCycle(100)
+            pwm_motor_2A.ChangeDutyCycle(100)
+            subprocess.Popen(["mpg123", "-q", "--loop", "-1", SONIDO_PATH],
+                             stdout=subprocess.DEVNULL,
+                             stderr=subprocess.DEVNULL)
+            break  # Ejecuta solo una vez por detección
+        time.sleep(0.1)  # Espera breve para no saturar CPU
+
+# --- Ruta de control ---
+@app.route("/control", methods=["POST"])
+def control():
+    global rutina_activa
+    data = request.json
+    dispositivo = data.get("dispositivo")
+    accion = data.get("accion")  # on/off
+    
+    if accion not in ["on", "off"]:
+        return jsonify({"status": "error", "message": "Accion invalida"}), 400
+
+    # --- Luz ---
+    if dispositivo == "luz":
+        GPIO.output(PIN_LUZ, GPIO.HIGH if accion == "on" else GPIO.LOW)
+        return jsonify({"status": "ok", "dispositivo": "luz", "accion": accion})
+
+    # --- Motor ---
+    if dispositivo == "motor":
+        if accion == "on":
+            pwm_motor_1A.ChangeDutyCycle(100)
+            pwm_motor_2A.ChangeDutyCycle(100)
+        else:
+            pwm_motor_1A.ChangeDutyCycle(0)
+            pwm_motor_2A.ChangeDutyCycle(0)
+        return jsonify({"status": "ok", "dispositivo": "motor", "accion": accion})
+
+    # --- Sonido ---
+    if dispositivo == "sonido":
+        if accion == "on":
+            subprocess.Popen(["mpg123", "-q", "--loop", "-1", SONIDO_PATH],
+                             stdout=subprocess.DEVNULL,
+                             stderr=subprocess.DEVNULL)
+        else:
+            subprocess.run(["pkill", "mpg123"])
+        return jsonify({"status": "ok", "dispositivo": "sonido", "accion": accion})
+
+    # --- Rutina completa ---
+    if dispositivo == "rutina":
+        if accion == "on":
+            if not rutina_activa:
+                rutina_activa = True
+                # Inicia hilo que espera al PIR
+                threading.Thread(target=rutina_espera_pir, daemon=True).start()
+            return jsonify({"status": "ok", "dispositivo": "rutina", "accion": "on"})
+        else:
+            # Apagar rutina y todo
+            rutina_activa = False
+            GPIO.output(PIN_LUZ, GPIO.LOW)
+            pwm_motor_1A.ChangeDutyCycle(0)
+            pwm_motor_2A.ChangeDutyCycle(0)
+            subprocess.run(["pkill", "mpg123"])
+            return jsonify({"status": "ok", "dispositivo": "rutina", "accion": "off"})
+
+    return jsonify({"status": "error", "message": "Dispositivo invalido"}), 400
+
+# --- Ruta PWM ---
+@app.route("/pwm", methods=["POST"])
+def pwm_control():
+    data = request.json
+    valor = data.get("valor")
+    try:
+        valor = int(valor)
+        if 0 <= valor <= 100:
+            pwm_motor_1A.ChangeDutyCycle(valor)
+            pwm_motor_2A.ChangeDutyCycle(valor)
+            return jsonify({"status": "ok", "pwm": valor})
+        else:
+            return jsonify({"status": "error", "message": "Valor fuera de rango"}), 400
+    except (TypeError, ValueError):
+        return jsonify({"status": "error", "message": "Valor invalido"}), 400
+
+# --- Ejecución del servidor Flask ---
+if __name__ == "__main__":
+    try:
+        app.run(host="0.0.0.0", port=5000)
+    finally:
+        pwm_motor_1A.stop()
+        pwm_motor_2A.stop()
+        GPIO.cleanup()
+
