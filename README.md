@@ -1,5 +1,21 @@
-**#Dashborad design programmed in FLet framework to control a Tokinomo and its features.**
-###The following project consists in a designed Dashboard programmed with Flet. The dashboard contains a login section in which is neccesary to authenticate your licenses to access the following section. The next section contains 5 different buttons, each of them to control differente features (ilumination, sounds or dc motor) other button initialize the complete routine, just if the movement PIR sensor detects a person. And the final button consists in a slide button to control the spin motor speed by conotroling the PWM signals.
+# Tokinomo Control Dashboard with Flet and Flask
 
-###Besides, the components works by a Raspberry pi 5, so the Dashboard must have remote communication with the Raspberry in order to control their pinout. In this way, a Flask Server was programmed in the Raspberry, so the dashboard 
-must send remote HTTP requests by POST method wich consists in sending packaged data that requests converts to JSON format. This is the ideal way to send state changes such as the ones in the buttons (on/off). Finally the Flask server decode the packaged data and execute the pinout programmed logic to set to high or low a GPIO or control a PWM signal, according to the data that is received from the dashboard button state,
+This project is a **Dashboard built with Flet** to control a Tokinomo and its features via a **Raspberry Pi 5**.
+
+## Features
+
+- **Login Section:** License authentication to access the Dashboard.  
+- **Feature Controls:** 5 buttons to manage illumination, sound, and DC motor.  
+- **Automatic Routine:** A button triggers the full routine only if the PIR sensor detects motion.  
+- **Speed Control:** A slider adjusts the spin motor speed via PWM signals.
+
+## Raspberry Pi Communication
+
+The Dashboard communicates remotely with the Raspberry Pi using a **Flask server**:
+
+1. The Dashboard sends **HTTP POST requests** with JSON data representing button states (on/off or PWM values).  
+2. The Flask server decodes the data and executes the programmed logic to:  
+   - Turn GPIOs on or off.  
+   - Adjust PWM signals according to user input.
+
+This setup enables full remote control of the Tokinomo through the Dashboard.
