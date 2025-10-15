@@ -1,14 +1,14 @@
 import flet as ft
 import requests
-from service import controlar_dispositivo_gpio, set_motor_pwm 
+from service import control_gadget, set_motor_pwm 
 
 def main(page: ft.Page):
-    page.title = "Panel de Control Octynomo"
+    page.title = "Octynomo Dashboard"
     page.window_height = 800
     page.window_width = 1200
     page.scroll = ft.ScrollMode.ALWAYS
 
-    fondo_diseño = ft.Stack(
+    background_design = ft.Stack(
         [
             ft.Container(
                 gradient=ft.LinearGradient(
@@ -33,22 +33,22 @@ def main(page: ft.Page):
         expand=True,
     )
 
-    estado_dispositivos = {"luz": False, "sonido": False, "rutina": False, "motor": False}
-    mapeo_data = {"Luz": "luz", "Sonido": "sonido", "Rutina": "rutina", "Motor": "motor"}
+    gadget_states = {"ilumination": False, "sound": False, "routine": False, "motor": False}
+    data_mapping = {"Ilumination": "ilumination", "Sound": "sound", "Routine": "routine", "Motor": "motor"}
 
     # Login
-    txt_usuario = ft.TextField(
-        hint_text="Usuario", border_radius=12, bgcolor="white",
+    txt_user = ft.TextField(
+        hint_text="User", border_radius=12, bgcolor="white",
         height=55, content_padding=15, text_align=ft.TextAlign.LEFT
     )
     txt_password = ft.TextField(
-        hint_text="Contraseña", password=True, can_reveal_password=True,
+        hint_text="Password", password=True, can_reveal_password=True,
         border_radius=12, bgcolor="white", height=55, content_padding=15, text_align=ft.TextAlign.LEFT
     )
-    txt_error = ft.Text("⚠️ Usuario o contraseña incorrectos", color="red500", visible=False)
+    txt_error = ft.Text("⚠️ Incorrect user or password", color="red500", visible=False)
 
     def login_click(e):
-        if txt_usuario.value == "adm" and txt_password.value == "1":
+        if txt_user.value == "adm" and txt_password.value == "1":
             page.go("/panel")
         else:
             txt_error.visible = True
@@ -59,7 +59,7 @@ def main(page: ft.Page):
             controls=[
                 ft.Container(expand=True),
                 ft.Text(
-                    "Inicio de sesión",
+                    "Login",
                     size=32,
                     weight=ft.FontWeight.BOLD,
                     color="blueGrey900",
@@ -75,11 +75,11 @@ def main(page: ft.Page):
                 ),
 
                 ft.Divider(height=25, color="transparent"),
-                txt_usuario,
+                txt_user,
                 txt_password,
                 ft.Container(height=20),
                 ft.ElevatedButton(
-                    content=ft.Text("Entrar", size=20, weight=ft.FontWeight.BOLD),
+                    content=ft.Text("Enter", size=20, weight=ft.FontWeight.BOLD),
                     on_click=login_click,
                     bgcolor="blue700",
                     color="white",
@@ -105,7 +105,7 @@ def main(page: ft.Page):
         [
             ft.Stack(
                 controls=[
-                    fondo_diseño,
+                    background_design,
                     ft.Container(content=login_form, alignment=ft.alignment.center, expand=True),
                     ft.Container(
                         content=ft.Image(
@@ -121,36 +121,36 @@ def main(page: ft.Page):
     )
 
     # Panel
-    def toggle_dispositivo(e):
+    def gadget_toggle(e):
         btn = e.control
-        nombre_display = btn.data
-        dispositivo_key = mapeo_data.get(nombre_display)
-        if not dispositivo_key:
+        display_name = btn.data
+        gadget_key = data_mapping.get(display_name)
+        if not gadget_key:
             return
 
-        estado_dispositivos[dispositivo_key] = not estado_dispositivos[dispositivo_key]
-        encendido = estado_dispositivos[dispositivo_key]
-        btn.bgcolor = "green700" if encendido else "red700"
-        btn.text = f"{nombre_display}: {'Encendido' if encendido else 'Apagado'}"
+        gadget_states[gadget_key] = not gadget_states[gadget_key]
+        started = gadget_states[gadget_key]
+        btn.bgcolor = "green700" if started else "red700"
+        btn.text = f"{display_name}: {'On' if started else 'Off'}"
         page.update()
-        controlar_dispositivo_gpio(dispositivo_key, "encender" if encendido else "apagar")
+        control_gadget(gadget_key, "on" if started else "off")
 
-    def slider_cambio(e):
-        valor = int(e.control.value)
-        velocidad_value.value = f"Velocidad: {valor}%"
+    def change_slide(e):
+        value = int(e.control.value)
+        speed_value.value = f"Speed: {value}%"
         page.update()
-        set_motor_pwm(valor)
+        set_motor_pwm(value)
 
     # Boton deslizador
-    velocidad_value = ft.Text("Velocidad: 0%", size=16, color="white")
+    speed_value = ft.Text("Speed: 0%", size=16, color="white")
     velocidad_slider = ft.Slider(
         min=0, max=100, divisions=100, value=0,
-        on_change=slider_cambio,
+        on_change=change_slide,
         active_color="blue700", thumb_color="blue900", expand=True
     )
     slider_container = ft.Container(
         content=ft.Column(
-            [velocidad_slider, velocidad_value],
+            [velocidad_slider, speed_value],
             horizontal_alignment=ft.CrossAxisAlignment.CENTER
         ),
         padding=25,
@@ -160,20 +160,20 @@ def main(page: ft.Page):
     )
 
     # Botones
-    botones_row = ft.ResponsiveRow(
+    buttons_row = ft.ResponsiveRow(
         spacing=25,
         controls=[
             ft.Container(
                 content=ft.ElevatedButton(
-                    text=f"{dispositivo}: Apagado", data=dispositivo,
-                    on_click=toggle_dispositivo,
+                    text=f"{gadget}: Off", data=gadget,
+                    on_click=gadget_toggle,
                     bgcolor="red700", color="white",
                     height=90, expand=True,
                     style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=15))
                 ),
                 col={"xs":12, "sm":6, "md":3},
                 expand=True,
-            ) for dispositivo in ["Luz", "Sonido", "Motor", "Rutina"]
+            ) for gadget in ["Ilumination", "Sound", "Motor", "Routine"]
         ]
     )
 
@@ -181,9 +181,9 @@ def main(page: ft.Page):
     panel_content = ft.Container(
         content=ft.Column(
             controls=[
-                ft.Text("Control de Octynomo", size=34, weight="bold", color="white"),
-                ft.Text("Control de funciones", size=22, color="white70"),
-                botones_row,
+                ft.Text("Octynomo controls", size=34, weight="bold", color="white"),
+                ft.Text("Features", size=22, color="white70"),
+                buttons_row,
                 ft.Divider(height=40, color="transparent"),
                 slider_container
             ],
@@ -202,7 +202,7 @@ def main(page: ft.Page):
         [
             ft.Stack(
                 controls=[
-                    fondo_diseño,
+                    background_design,
                     ft.Container(content=panel_content, expand=True, alignment=ft.alignment.center),
                     ft.Container(
                         content=ft.Image(
