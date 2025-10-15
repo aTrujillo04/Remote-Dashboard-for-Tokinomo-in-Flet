@@ -2,6 +2,8 @@
 
 This project is a **Dashboard built with Flet** to control a Tokinomo and its features via a **Raspberry Pi 5**.
 
+![](fletdash.png)
+
 ## Features
 
 - **Login Section:** License authentication to access the Dashboard.  
@@ -81,7 +83,7 @@ python3 app.py
 First, you will see a login section wich you can pass by writting as user: *adm* and for password: *1*. Although you will see the Tokinomo dashboard and push the buttons, none of them will work because the missing Flask server in the Raspberry. So now **in the Raspberry** you will create a new folder and inside this copy and paste the [Tokinomo.txt] (Tokinomo.txt) content.
 In addition, a virtual enviroment should be created and activated inside the same folder:
 
-``bash
+```bash
 cd /route/to/this/repository
 python3 -m venv virtual_enviroment_name
 source virtual_enviroment_name/bin/activate
