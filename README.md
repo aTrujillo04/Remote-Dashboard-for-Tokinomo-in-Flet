@@ -66,7 +66,10 @@ python3 -m venv virtual_enviroment_name
 source virtual_enviroment_name/bin/activate
 ```
 The previous lines place you in the repository location inside your computer, create your virtual enviroment and activate it. When the virtual enviroment is activated you should see something like this:
-**(.virtual_enviroment_name) user@computer:~/route/to/repository$**
+
+```bash
+(.virtual_enviroment_name) user@computer:~/route/to/repository$
+```
 
 Now let's download Flet **inside the new virtual enviroment** and verify the installation by seeing the downloaded version:
 
@@ -233,8 +236,8 @@ txt_user = ft.TextField(
                 ft.Text("Features", size=22, color="white70"),
   ```
 
-  ## Project STructure
-  
+  ## Project Structure
+```text
  Remote-Dashboard-for-Tokinomo-in-Flet/
 ├── Raspberry/
 │   ├── Tokinomo.py
@@ -250,7 +253,7 @@ txt_user = ft.TextField(
 ├── README.md
 ├── fletdash.png
 └── .gitignore
-
+``
 
 ## Troubleshooting
 
