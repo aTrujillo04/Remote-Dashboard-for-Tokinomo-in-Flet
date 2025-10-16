@@ -82,7 +82,7 @@ python3 app.py
 ```
 First, you will see a login section, which you can bypass by entering the following credentials: **user: adm** and **password: 1**. After logging in, the Tokinomo dashboard will be displayed; however, none of the buttons will function yet because the Flask server on the Raspberry Pi is not running.
 
-To set it up, **on the Raspberry Pi**, create a new folder and copy the contents of [#Tokinomo.txt] (./Tokinomo.txt).
+To set it up, **on the Raspberry Pi**, create a new folder and copy the contents of [Tokinomo.txt](./Tokinomo.txt).
 
 ```bash
 cd /route/to/this/repository
