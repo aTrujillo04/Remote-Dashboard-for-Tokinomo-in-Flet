@@ -26,8 +26,8 @@ This setup enables full remote control of the Tokinomo through the Dashboard.
 - Requirements
 - Installation
 - Operation
-- Project Structure
 - Specs
+- Project Structure
 - Troubleshooting
 - Contributing
 
@@ -80,7 +80,7 @@ Then, you wil be able to visualize the graphic interface by entering the followi
 ```bash
 python3 app.py
 ```
-First, you will see a login section wich you can pass by writting as user: *adm* and for password: *1*. Although you will see the Tokinomo dashboard and push the buttons, none of them will work because the missing Flask server in the Raspberry. So now **in the Raspberry** you will create a new folder and inside this copy and paste the [Tokinomo.txt] (Tokinomo.txt) content.
+First, you will see a login section wich you can pass by writting as user: *adm* and for password: *1*. Although you will see the Tokinomo dashboard and push the buttons, none of them will work because the missing Flask server in the Raspberry. So now **in the Raspberry** you will create a new folder and inside this copy and paste the [Tokinomo.txt] (./Tokinomo.txt) content.
 In addition, a virtual enviroment should be created and activated inside the same folder:
 
 ```bash
@@ -96,10 +96,22 @@ python3 -m flask --version
 ```
 You should be able to se something like this: **Flask vX.X.X** 
 
+## Operation
+Now the dashboard and Flask server are ready to communicate and start working. But first, we should consider some important points:
+- The remote laptop/PC and the Raspberry should be connected to **the same internet network**
+- The IP addres should be changed in *service.py* line 3:
+  ```bash
+  RASP_IP = "http://XXX.XXX.X.XXX:5000"
+  ```
+The IP addres can be knowed by entering in Raspberry terminal:
 
+```bash
+hostname -I
+```
+Now that you considerer the previous points, the dashboard and Flask server should be abile to connect each other.
 
-
-
+## Specs 
+  
 
 
 
