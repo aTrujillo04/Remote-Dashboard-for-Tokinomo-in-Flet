@@ -98,14 +98,14 @@ Then, when the virtual enviroment is activated, you must download Flask and veri
 pip install flask
 python3 -m flask --version
 ```
-You should be able to se something like this: **Flask vX.X.X** 
+You should be able to see something like this: **Flask vX.X.X** 
 
 Now, to run the Flask server you should enter in terminal:
 
 ```bash
 python3 Tokinomo.py
 ```
-If the server **runs optimally** and is waiting for HTTP requests you shold see something like this:
+If the server **runs optimally** and is waiting for HTTP requests you should see something like this:
 
 ```bash
 * Serving Flask app 'Tokinomo'
@@ -118,7 +118,7 @@ Press CTRL+C to quit
 ```
 Finally, let's create a pm2 process and make it a **startup** one so the Flask server will automatically run 15 seconds after the Raspberry is energyzed.
 
-Firt let's create a .sh file **in home**. The file will contain this:
+First let's create a .sh file **in home**. The file will contain this:
 
 ```bash
 #!/bin/bash
@@ -137,18 +137,19 @@ npm -v
 sudo npm install -g pm2
 pm2 -v
 ```
-After you see the versions, you can confirm the installation. So now, let's create the pm2 process, first making executable the sript.sh you just created:
+After you see the versions, you can confirm the installation. So now, let's create the pm2 process, first making executable the script.sh you just created:
 
 ```bash
 chmod +x /home/ubuntu_user/folder/tokinomo_server.sh
 ```
-Now, let's test the pm2 process manually and verity its creation:
+Now, let's test the pm2 process manually and verify its creation:
 
 ```bash
 pm2 start /home/pi/Tokinomo/tokinomo_server.sh --desired_name_for_pm2
 pm2 status
 ```
 You should see something like this:
+
 ```bash
 ┌─────┬───────────────┬──────┬─────┬─────────┐
 │ id  │ name          │ mode │ pid │ status  │
@@ -172,7 +173,7 @@ You must copy and enter it to the terminal, and finally make:
 ```bash
 pm2 save
 ```
-To finisth, you must restart the raspberry and verify the pm2 creation:
+To finish, you must restart the raspberry and verify the pm2 creation:
 
 ```bash
 sudo reboot
@@ -193,6 +194,7 @@ Again, you must see something like this, and finish the process:
 Now the dashboard and Flask server are ready to communicate and start working. But first, we should consider some important points:
 - The remote laptop/PC and the Raspberry should be connected to **the same internet network**.
 - The IP addres **should be changed** in *service.py* line 3:
+  
   ```bash
   RASP_IP = "http://XXX.XXX.X.XXX:5000"
   ```
@@ -201,10 +203,10 @@ The IP addres can be knowed by entering in **Raspberry terminal**:
 ```bash
 hostname -I
 ```
-Now that you considerer the previous points, the dashboard and Flask server should be abile to connect to each other.
+Now that you consider the previous points, the dashboard and Flask server should be able to connect to each other.
 
 ## Specs 
-For desired changes isnide the dashboard:
+For desired changes inside the dashboard:
 - The page title can be modified in the following line (line 6):
   
 ```bash
@@ -229,7 +231,7 @@ txt_user = ft.TextField(
   ```bash
    src="https://desired/image.png",
   ``
-- To change dashboard tittles and its properties check from line 184 to 188:
+- To change dashboard titles and its properties check from line 184 to 188:
 
   ```bash
   ft.Text("Octynomo controls", size=34, weight="bold", color="white"),
@@ -278,7 +280,7 @@ Traceback (most recent call last):
     raise error("gpio not allocated")
 RuntimeError: gpio not allocated
 ```
-This means that the script cannot access to the GPIO Raspberry pinout, so:
+This means that the script cannot access to the GPIO Raspberry pinout, so each of these solutions could help:
 1. Look for other proccess or scripts using the pinout and stop them:
 
 ```bash
@@ -306,7 +308,8 @@ sudo apt purge python3-rpi.gpio -y
 sudo apt autoremove -y
 sudo apt install python3-rpi.gpio -y
 ```
-**IMPORTANT: AFTER APPYING ANY OF THESE SOLUTION YOU MUST RESTART THE RASPBERRY AND TEST THE COMMUNICATION AGAIN:**
+**IMPORTANT: AFTER APPLYING ANY OF THESE SOLUTION YOU MUST RESTART THE RASPBERRY AND TEST THE COMMUNICATION AGAIN:**
+
 ```bash
 sudo reboot
 ```
@@ -318,4 +321,4 @@ Contributions are appreciated. Please follow this steps to contribute:
 3. Make your changes in the new branch.
 4. Commit your changes.
 5. Make a push inside your own branch.
-6. Make a Pull Resquest.
+6. Make a Pull Request.
