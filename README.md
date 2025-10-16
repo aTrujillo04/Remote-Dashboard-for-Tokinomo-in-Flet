@@ -11,7 +11,7 @@ This project is a **Dashboard built with Flet** to control a Tokinomo and its fe
 - **Automatic Routine:** A button triggers the full routine in an automate way.  
 - **Speed Control:** A slider adjusts the spin motor speed via PWM signals.
 
-## Raspberry Pi Communication
+## Communication
 
 The Dashboard communicates remotely with the Raspberry Pi using a **Flask server**:
 
@@ -235,22 +235,30 @@ txt_user = ft.TextField(
 
   ## Project STructure
   
-  Remote-Dashboard-for-Tokinomo-in-Flet/
-  |--Raspberry
-  | |--Tokinomo.py
-  | |---venv
-  |  |-Flask
-  |
-  |--Remote laptop
-  | |--app.py
-  | |--service.py
-  | |-.venv
-  |  |-Flet
-  |
-  |--README.md
-  |--fletdash-png
-  |.gitignore 
+ Remote-Dashboard-for-Tokinomo-in-Flet/
+├── Raspberry/
+│   ├── Tokinomo.py
+│   ├── venv/
+│   └── Flask/
+│
+├── Remote laptop/
+│   ├── app.py
+│   ├── service.py
+│   ├── .venv/
+│   └── Flet/
+│
+├── README.md
+├── fletdash.png
+└── .gitignore
+
 
 ## Troubleshooting
 
 ## Contributing
+Contributions are appreciated. Please follow this steps to contribute:
+1. Clon the repository.
+2. Create a new branch.
+3. Make your changes in the new branch.
+4. Commit your changes.
+5. Make a push inside your own branch.
+6. Make a Pull Resquest.
