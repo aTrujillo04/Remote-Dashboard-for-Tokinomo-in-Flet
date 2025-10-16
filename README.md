@@ -237,24 +237,79 @@ txt_user = ft.TextField(
   ```
 
   ## Project Structure
+  
+```text
 Remote-Dashboard-for-Tokinomo-in-Flet/
-  Raspberry/
-    Tokinomo.py
-    venv/
-    Flask/
-  
-  Remote laptop/
-    app.py
-    service.py
-    .venv/
-    Flet/
-  
-  README.md
-  fletdash.png
-  .gitignore
-
+├── Raspberry/
+│   ├── Tokinomo.py
+│   ├── venv/
+│   └── Flask/
+│
+├── Remote laptop/
+│   ├── app.py
+│   ├── service.py
+│   ├── .venv/
+│   └── Flet/
+│
+├── README.md
+├── fletdash.png
+└── .gitignore
+``
 
 ## Troubleshooting
+While trying to use **the dashboard buttons**,you may get this message error:
+
+```bash
+⚠️ Error while connecting to Raspberry (ilumination): HTTPConnectionPool(host='192.168.1.169', port=5000): Max retries exceeded with url: /control (Caused by ConnectTimeoutError(<urllib3.connection.HTTPConnection object at 0x72c2b3f513c0>, 'Connection to 192.168.1.169 timed out. (connect timeout=3)
+```
+This means that the HTTP request is sent, but no recived because of communication troubles with Flask server. So you must:
+1. Confirm that your remote PC/Laptop is connected  to the same WI-fi network than your Raspberry.
+2. Confirm that the dashboard has the same IP addres than your Raspberry.
+3. Verify the Flask server operation.
+4. Verify that port 5000 is not blocked.
+
+Another common error you could have while running the **Flask server**:
+
+```bash
+Traceback (most recent call last):
+  File "Tokinomo.py", line 54, in <module>
+    GPIO.setup(4, GPIO.OUT)
+  File "/usr/lib/python3/dist-packages/RPi/GPIO/__init__.py", line 164, in setup
+    raise error("gpio not allocated")
+RuntimeError: gpio not allocated
+```
+This means that the script cannot access to the GPIO Raspberry pinout, so:
+1. Look for other proccess or scripts using the pinout and stop them:
+
+```bash
+ps aux | grep pigpiod
+sudo systemctl stop pigpiod
+```
+It is optional to restart GPIO service:
+
+```bash
+sudo systemctl restart gpiochip
+```
+2. Execute your script with superuser permissions:
+
+```bash
+sudo python3 Tokinomo.py
+```
+3. It is suggested to clean the pin state at the end of all your scripts, so the pins can stay unocuppied while not running any script. So add at the end of all your scripts that use GPIO pinout:
+```bash
+GPIO.cleanup()
+```
+
+4. Another unlikely solution could be reinstall RPi.GPIO:
+```bash
+sudo apt purge python3-rpi.gpio -y
+sudo apt autoremove -y
+sudo apt install python3-rpi.gpio -y
+```
+**IMPORTANT: AFTER APPYING ANY OF THESE SOLUTION YOU MUST RESTART THE RASPBERRY AND TEST THE COMMUNICATION AGAIN:**
+```bash
+sudo reboot
+``
 
 ## Contributing
 Contributions are appreciated. Please follow this steps to contribute:
