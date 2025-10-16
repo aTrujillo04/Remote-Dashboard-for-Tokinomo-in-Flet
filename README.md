@@ -23,13 +23,13 @@ The Dashboard communicates remotely with the Raspberry Pi using a **Flask server
 This setup enables full remote control of the Tokinomo through the Dashboard.
 
 ## Table of contents
-- Requirements
-- Installation
-- Operation
-- Specs
-- Project Structure
-- Troubleshooting
-- Contributing
+- [Requirements](#Requirements)
+- [Installation](#Installation)
+- [Operation](#Operation)
+- [Specs](#Specs)
+- [Project Structure](#Project-Structure)
+- [Troubleshooting](#Troubleshooting)
+- [Contributing](#Contributing)
 
 ## Requirements
 **Hardware**
@@ -254,7 +254,7 @@ Remote-Dashboard-for-Tokinomo-in-Flet/
 ├── README.md
 ├── fletdash.png
 └── .gitignore
-``
+```
 
 ## Troubleshooting
 While trying to use **the dashboard buttons**,you may get this message error:
@@ -309,7 +309,7 @@ sudo apt install python3-rpi.gpio -y
 **IMPORTANT: AFTER APPYING ANY OF THESE SOLUTION YOU MUST RESTART THE RASPBERRY AND TEST THE COMMUNICATION AGAIN:**
 ```bash
 sudo reboot
-``
+```
 
 ## Contributing
 Contributions are appreciated. Please follow this steps to contribute:
