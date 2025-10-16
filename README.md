@@ -237,23 +237,22 @@ txt_user = ft.TextField(
   ```
 
   ## Project Structure
-```text
- Remote-Dashboard-for-Tokinomo-in-Flet/
-├── Raspberry/
-│   ├── Tokinomo.py
-│   ├── venv/
-│   └── Flask/
-│
-├── Remote laptop/
-│   ├── app.py
-│   ├── service.py
-│   ├── .venv/
-│   └── Flet/
-│
-├── README.md
-├── fletdash.png
-└── .gitignore
-``
+Remote-Dashboard-for-Tokinomo-in-Flet/
+  Raspberry/
+    Tokinomo.py
+    venv/
+    Flask/
+  
+  Remote laptop/
+    app.py
+    service.py
+    .venv/
+    Flet/
+  
+  README.md
+  fletdash.png
+  .gitignore
+
 
 ## Troubleshooting
 
