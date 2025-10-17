@@ -1,42 +1,42 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify #Import libraries for Flask, RPi.GPIO, os, threading, etc.
 import RPi.GPIO as GPIO
 import subprocess
 import os
 import threading
 import time
 
-app = Flask(__name__)
+app = Flask(__name__) #Create an application objetc for the server 
 
-PIN_LUZ = 22
+PIN_LUZ = 22 #Define the pinout for components being used
 PIN_MOTOR_1A = 12
 PIN_MOTOR_2A = 18
 PIN_PIR = 25
 
-GPIO.setmode(GPIO.BCM) 
-GPIO.setup(4,GPIO.OUT) 	#Enable
-GPIO.output(4,GPIO.HIGH) #Enable always on
-GPIO.setup(PIN_LUZ,GPIO.OUT) #Ilumination
-GPIO.setup(PIN_MOTOR_1A,GPIO.OUT) #Motor
-GPIO.setup(PIN_MOTOR_2A,GPIO.OUT) #Motor
-GPIO.setup(PIN_PIR,GPIO.IN) #Sensor
+GPIO.setmode(GPIO.BCM) #Defines the numeration pinout mode in the Raspberry
+GPIO.setup(4,GPIO.OUT) 	#Enable #Pin enable so the motor can work
+GPIO.output(4,GPIO.HIGH) #Enable always on #Pin 4 has to be alwas enable
+GPIO.setup(PIN_LUZ,GPIO.OUT) #Ilumination #Assign the GPIO as an output for illumination
+GPIO.setup(PIN_MOTOR_1A,GPIO.OUT) #Motor 
+GPIO.setup(PIN_MOTOR_2A,GPIO.OUT) #Motor #Configure the pinout for the motor 
+GPIO.setup(PIN_PIR,GPIO.IN) #Sensor #Configure the GPIO to read info from the PIR sensor
 
 
 #PWM Motor
-FREQ_PWM = 1000
-pwm_motor_1A = GPIO.PWM(PIN_MOTOR_1A, FREQ_PWM)
-pwm_motor_2A = GPIO.PWM(PIN_MOTOR_2A, FREQ_PWM)
+FREQ_PWM = 1000 #Modulates the frequency to 1Khz
+pwm_motor_1A = GPIO.PWM(PIN_MOTOR_1A, FREQ_PWM) 
+pwm_motor_2A = GPIO.PWM(PIN_MOTOR_2A, FREQ_PWM) #Create objects for GPIO.PWM and associated with the frequency
 pwm_motor_1A.start(0)
-pwm_motor_2A.start(0)
+pwm_motor_2A.start(0) #Set both motors start to 0.
 
-SONIDO_PATH = os.path.join(os.path.dirname(__file__), "ZWAN.mp3")
+SONIDO_PATH = os.path.join(os.path.dirname(__file__), "ZWAN.mp3") #Define the audio .mp3 route by indicating that its  in the same script route.
 
-active_routine= False
+active_routine= False #Set to false start a variable for the routine
 
-def wait_pir():
+def wait_pir(): #Define a function in a individual thread waiting for the PIR detection
     global active_routine
     print("Active routine, waiting for detection")
     while active_routine:
-        if GPIO.input(PIN_PIR) == GPIO.HIGH:
+        if GPIO.input(PIN_PIR) == GPIO.HIGH:#Execute the complete routine 
             print("PIR detected movement, executing routine")
             #Executing ilumination, sound and motor
             GPIO.output(PIN_LUZ, GPIO.HIGH)
@@ -49,81 +49,81 @@ def wait_pir():
         time.sleep(0.1)
 
 #General control
-@app.route("/control", methods=["POST"])
-def control():
-    global active_routine
-    data = request.json
-    gadget = data.get("gadget")
-    action = data.get("action") #on/off
+@app.route("/control", methods=["POST"]) #Route for the communication via HTTP Post by /control route
+def control(): #Define function for control 
+    global active_routine #Variable defined for changes 
+    data = request.json #Json recived from the cliente
+    gadget = data.get("gadget") #Determine the desired gadget to control
+    action = data.get("action") #on/off #Determine the state
     
-    if action not in ["on" , "off"]:
+    if action not in ["on" , "off"]: #Verify a valid action 
         return jsonify({"status" : "error" , "message" : "Invalid Action"}), 400
     
-    #Ilumination
-    if gadget == "ilumination":
-        GPIO.output(PIN_LUZ, GPIO.HIGH if action == "on" else GPIO.LOW)
+    #Ilumination 
+    if gadget == "ilumination": #Turn on the illumination by the recived action from the dashboard
+        GPIO.output(PIN_LUZ, GPIO.HIGH if action == "on" else GPIO.LOW) #If the state is on, tge pinout change to HIGH
         return jsonify({"status" : "ok" , "gadget" : "ilumination", "action" : action})
     
     #Motor
-    if gadget == "motor":
+    if gadget == "motor": #If the selected gadget is motor and the state "on", bot pinouts will turn on with 1 PWM.
         if action == "on":
             pwm_motor_1A.ChangeDutyCycle(1)
             pwm_motor_2A.ChangeDutyCycle(1)
         else:
-            pwm_motor_1A.ChangeDutyCycle(0)
+            pwm_motor_1A.ChangeDutyCycle(0) #Other state will modulate the PWM to 0.
             pwm_motor_2A.ChangeDutyCycle(0)
-        return jsonify({"status" : "ok" , "gadget" : "motor" , "action" : action})
+        return jsonify({"status" : "ok" , "gadget" : "motor" , "action" : action}) #returns a message to verify the operation
     
     #Sound
     if gadget == "sound":
         if action == "on":
-            subprocess.Popen(["mpg123", "-q", "--loop","-1", SONIDO_PATH],
+            subprocess.Popen(["mpg123", "-q", "--loop","-1", SONIDO_PATH], #If gadget is on and sound the audio wil be played
                              stdout=subprocess.DEVNULL,
                              stderr=subprocess.DEVNULL)
         else:
-            subprocess.run(["pkill" , "mpg123"])
-        return jsonify({"status" : "ok" , "gadget" : "sound" ,  "action" : action})
+            subprocess.run(["pkill" , "mpg123"]) #Any other option will kill the process.
+        return jsonify({"status" : "ok" , "gadget" : "sound" ,  "action" : action}) #Message returned to varify the operation.
     
     #Complete routine
     if gadget == "routine":
         if action == "on":
-            if not active_routine:
+            if not active_routine: #If gadget is routine, and changed to on state and the global variable is no TRUE
                 active_routine = True
                 #Initialize thread that waits PIR detection
-                threading.Thread(target=wait_pir, daemon= True).start()
-            return jsonify({"status" : "ok" , "gadget" : "routine" , "action" : "on"})
+                threading.Thread(target=wait_pir, daemon= True).start() #THe thread waits for a PIR detection to execute all
+            return jsonify({"status" : "ok" , "gadget" : "routine" , "action" : "on"}) #Message to confirm the operation
         else:
             #Off routine
             active_routine = False
             GPIO.output(PIN_LUZ, GPIO.LOW)
             pwm_motor_1A.ChangeDutyCycle(0)
             pwm_motor_2A.ChangeDutyCycle(0)
-            subprocess.run(["pkill" , "mpg123"])
+            subprocess.run(["pkill" , "mpg123"]) #Any other state matains the routine off.
         return jsonify({"status" : "ok" , "gadget" : "routine" , "action" : "off"})
     
     return jsonify({"status" : "error" , "message" : "Invalid action"}), 400
 
 #Slide configuration
-@app.route("/pwm", methods= ["POST"])
-def pwm_control():
-    data = request.json
-    value = data.get("value")
+@app.route("/pwm", methods= ["POST"]) #Define the /pwm route to get HTTP POST request
+def pwm_control(): #Defined funcion to control pwm 
+    data = request.json #Get the states in json format from the dashboard
+    value = data.get("value") #Get the designated pwm value from the slide button in dashboard
     try:
         valuep = int(value)
         if 0 <= valuep <= 100:
             pwm_motor_1A.ChangeDutyCycle(valuep)
-            pwm_motor_2A.ChangeDutyCycle(valuep)
-            return jsonify ({"status" : "ok" , "pwm" : valuep})
+            pwm_motor_2A.ChangeDutyCycle(valuep) #Set the PWM value in pinout to the recived from the dashboard
+            return jsonify ({"status" : "ok" , "pwm" : valuep}) #Recived message to verify the operation
         else:
             return jsonify({"status" : "error", "message" : "Out of range value"}), 400
     except (TypeError, ValueError):
-        return jsonify({"status" : "error" , "message" : "Invalid Value"}), 400
+        return jsonify({"status" : "error" , "message" : "Invalid Value"}), 400 #Any other trobule in operation will be displayed by this message.
 
 #Server execution
 if __name__ == "__main__":
     try:
-        app.run(host="0.0.0.0", port=5000)
+        app.run(host="0.0.0.0", port=5000) #Server runninh in all interfaces in port 5000
     finally:
-        pwm_motor_1A.stop()
-        pwm_motor_2A.stop()
-        GPIO.cleanup()
+        pwm_motor_1A.stop() 
+        pwm_motor_2A.stop() #Stopping both PWM from the motors
+        GPIO.cleanup() #Cleaning GPIO configuration from the pinout.
